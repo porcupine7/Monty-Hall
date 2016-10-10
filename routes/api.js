@@ -28,25 +28,39 @@ router.get('/puzzles/:id', function(req, res, next) {
 /* POST action for puzzle*/
 router.post('/puzzles/:id', function(req, res, next) {
   var selection = req.body;
-  if (selection.action == "choose"){
-    PuzzleModel.findOne({'_id': req.params.id}, function(err, puzzle) {
-      if(!err) {
-        var shown_door = 3 - puzzle.win_index - selection.selected_index;
-        res.send({'_id': puzzle._id, 'shown_door': shown_door})
-      } else {
-        res.send("Error!!")
-      }
-    });
-  } else if (selection.action == "switch"){
-
-  } else if (selection.action == "stay"){
-  }
+  PuzzleModel.findOne({'_id': req.params.id}, function(err, puzzle) {
+    if(err) {
+      res.send("Error!!")
+      return;
+    }
+    if (puzzle.first_selection != -1){
+      //Show solution
+      var switched = puzzle.first_selection != selection.selected_index;
+      puzzle.switched = switched;
+      var won = selection.selected_index == puzzle.win_index;
+      puzzle.won = won;
+      puzzle.save(null)
+      res.send({'_id': puzzle._id, 'finished': true, 'switched': switched, 'won': won})
+      return;
+    }
+    var doorsToShow = [0, 1, 2];
+    doorsToShow[puzzle.win_index] = -1;
+    doorsToShow[selection.selected_index] = -1;
+    var shownDoor = -1;
+    while (shownDoor == -1){
+      shownDoor = doorsToShow[Math.floor((Math.random() * 3))];
+    }
+    puzzle.first_selection = selection.selected_index;
+    puzzle.save(null);
+    res.send({'_id': puzzle._id, 'finished': false, 'shown_door': shownDoor})
+   });
 });
 
 /* POST which creates a new puzzle */
 router.post('/puzzles', function(req, res, next) {
   var puzzleInstance = new PuzzleModel();
   puzzleInstance.win_index = Math.floor((Math.random() * 3));
+  puzzleInstance.first_selection = -1;
   puzzleInstance.save(function (err){
     console.log("Hello Puzzle: " + err);
     if(!err) {
@@ -58,4 +72,20 @@ router.post('/puzzles', function(req, res, next) {
   });
 });
 
+router.get('/puzzlestats', function(req, res, next) {
+  var stats = new Object();
+  PuzzleModel.find({}, function(err, puzzles) {
+    if(!err) {
+      var switchedPlayers = puzzles.filter(function(entry){return entry.switched})
+      stats.switchedPlayers = switchedPlayers.length;
+      stats.switchedWinners = switchedPlayers.filter(function(entry){return entry.won}).length;
+      var stayedPlayers = puzzles.filter(function(entry){return !entry.switched})
+      stats.stayedPlayers = stayedPlayers.length;
+      stats.stayedWinners = stayedPlayers.filter(function(entry){return entry.won}).length;
+      res.send(stats)
+    } else {
+      res.send("Error: " + err)
+    }
+  });
+});
 module.exports = router;

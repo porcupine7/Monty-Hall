@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  if(result == "won")
+    h1 You won a Pioneers Ticket! Have fun.
+  else
+    h1 You lost! But please take good care of your goat.
+  if(decision == "switch")
+    p You made the smart decision and switched the door. This gives you a higher probability to win! See how others fared:
+  else
+    p You didn't switch the door, which makes your probability to win lower. See how others fared:
+  table.table.table-striped.probability_tbl
+    tr
+      td
+      td Count of Players
+      td Winners
+      td Success Rate
+    tr
+      td Switched
+      td= stats.switchedPlayers
+      td= stats.switchedWinners
+      td= Number(stats.switchedWinners/stats.switchedPlayers*100).toFixed(2)
+    tr
+      td Stayed
+      td= stats.stayedPlayers
+      td= stats.stayedWinners
+      td= Number(stats.stayedWinners/stats.stayedPlayers*100).toFixed(2)
+  p
+    a(href="/") Try Again

@@ -2,11 +2,12 @@ extends layout
 
 block content
   h1 Welcome to Monty's Show!
-  p Behind one of these doors is a car. Behind each of the other two doors is a goat. Choose a door!
-  tr
-    td
-      button(class="btn" onclick="chooseDoor(#{JSON.stringify(puzzle._id)}, 0)") Door 1
-    td
-      button(class="btn" onclick="chooseDoor(#{JSON.stringify(puzzle._id)}, 1)") Door 2
-    td
-      button(class="btn" onclick="chooseDoor(#{JSON.stringify(puzzle._id)}, 2)") Door 3
+  p Behind one of these doors is a ticket to a hot conference. Behind each of the other two doors is a goat. Choose a door!
+  table.table.table-striped.doors_tbl
+    tr
+      td
+        button(class="btn" onclick="chooseDoor(#{JSON.stringify(puzzle._id)}, 0)") Door 1
+      td
+        button(class="btn" onclick="chooseDoor(#{JSON.stringify(puzzle._id)}, 1)") Door 2
+      td
+        button(class="btn" onclick="chooseDoor(#{JSON.stringify(puzzle._id)}, 2)") Door 3
