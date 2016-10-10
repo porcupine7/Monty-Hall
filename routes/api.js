@@ -10,6 +10,7 @@ var PuzzleSchema = new Schema({
   win_index : Number,
   first_selection: Number,
   switched: Boolean,
+  finished: Boolean,
   won: Boolean,
 });
 var PuzzleModel = mongoose.model('Puzzle', PuzzleSchema)
@@ -39,6 +40,7 @@ router.post('/puzzles/:id', function(req, res, next) {
       puzzle.switched = switched;
       var won = selection.selected_index == puzzle.win_index;
       puzzle.won = won;
+      puzzle.finished = true;
       puzzle.save(null)
       res.send({'_id': puzzle._id, 'finished': true, 'switched': switched, 'won': won})
       return;
@@ -74,7 +76,7 @@ router.post('/puzzles', function(req, res, next) {
 
 router.get('/puzzlestats', function(req, res, next) {
   var stats = new Object();
-  PuzzleModel.find({}, function(err, puzzles) {
+  PuzzleModel.find({finished: true}, function(err, puzzles) {
     if(!err) {
       var switchedPlayers = puzzles.filter(function(entry){return entry.switched})
       stats.switchedPlayers = switchedPlayers.length;
