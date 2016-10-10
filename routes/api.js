@@ -8,11 +8,6 @@ var Schema = mongoose.Schema,
   ObjectId = Schema.ObjectId;
 var PuzzleSchema = new Schema({
   win_index : Number,
-});
-var PuzzleModel = mongoose.model('Puzzle', PuzzleSchema)
-
-var GameSchema = new Schema({
-  puzzle_id: ObjectId,
   first_selection: Number,
   switched: Boolean,
   won: Boolean,
@@ -36,7 +31,8 @@ router.post('/puzzles/:id', function(req, res, next) {
   if (selection.action == "choose"){
     PuzzleModel.findOne({'_id': req.params.id}, function(err, puzzle) {
       if(!err) {
-        res.send({'_id': puzzle._id.toString()})
+        var shown_door = 3 - puzzle.win_index - selection.selected_index;
+        res.send({'_id': puzzle._id, 'shown_door': shown_door})
       } else {
         res.send("Error!!")
       }
@@ -55,7 +51,6 @@ router.post('/puzzles', function(req, res, next) {
     console.log("Hello Puzzle: " + err);
     if(!err) {
       console.log(puzzleInstance);
-     //res.send({'_id': puzzleInstance._id)})
      res.send(puzzleInstance);
    } else {
      res.send("Error!!")
